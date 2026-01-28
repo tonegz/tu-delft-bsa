@@ -253,13 +253,13 @@
         color = "linear-gradient(90deg, #ef4444, #f59e0b)";
         const remaining = BSA_THRESHOLD - total;
         const ecLabel = remaining === 1 ? 'EC' : 'ECs';
-        statusText.textContent = `You need ${remaining} more ${ecLabel} to pass the BSA.`;
+        statusText.textContent = `You need ${remaining} more`;
         statusText.className = "status fail";
       } else {
         color = "linear-gradient(90deg, #ef4444, #ef4444)";
         const remaining = BSA_THRESHOLD - total;
         const ecLabel = remaining === 1 ? 'EC' : 'ECs';
-        statusText.textContent = `You need ${remaining} more ${ecLabel} to pass the BSA.`;
+        statusText.textContent = `You need ${remaining} more`;
         statusText.className = "status fail";
       }
 
