@@ -13,45 +13,15 @@
       color: #1f2937;
     }
     h1 { margin-bottom: 0.25rem; }
-    .subtitle { color: #6b7280; margin-bottom: 2rem; }
-    .container { max-width: 900px; margin: 0 auto; }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr auto auto;
-      gap: 0.75rem 1rem;
-      align-items: center;
-      background: white;
-      padding: 1.5rem;
-      border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-    }
-    .grid-header {
-      font-weight: 600;
-      border-bottom: 1px solid #e5e7eb;
-      padding-bottom: 0.5rem;
-    }
-    .course { display: contents; }
-    .ec { text-align: right; color: #374151; }
-
-    label.course-label {
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    input[type="checkbox"] {
-      transform: scale(1.2);
-      cursor: pointer;
-    }
+    .subtitle { color: #6b7280; margin-bottom: 1.5rem; }
+    .container { max-width: 950px; margin: 0 auto; }
 
     .progress-card {
-      margin-top: 2rem;
       background: white;
-      padding: 1.5rem;
+      padding: 1.25rem 1.5rem 1.5rem;
       border-radius: 12px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      margin-bottom: 2rem;
     }
 
     .progress-bar {
@@ -60,37 +30,98 @@
       background: #e5e7eb;
       border-radius: 999px;
       overflow: hidden;
-      margin: 0.75rem 0 0.5rem;
+      margin-top: 0.75rem;
     }
 
     .progress-fill {
       height: 100%;
       width: 0%;
-      background: red;
       transition: width 0.3s ease, background 0.3s ease;
     }
 
-    .bsa-marker {
-      position: absolute;
-      left: 75%; /* 45 / 60 */
-      top: -6px;
-      width: 2px;
-      height: 34px;
-      background: #111827;
-    }
-
-    .bsa-label {
+    .threshold-marker {
       position: absolute;
       left: 75%;
-      top: 32px;
+      top: -6px;
+      bottom: -6px;
+      width: 2px;
+      background: #374151;
+    }
+
+    .threshold-label {
+      position: absolute;
+      left: 75%;
+      top: -1.4rem;
       transform: translateX(-50%);
       font-size: 0.75rem;
       color: #374151;
     }
 
-    .status { font-weight: 600; margin-top: 0.5rem; }
+    .status {
+      margin-top: 0.5rem;
+      font-weight: 600;
+    }
+
     .status.pass { color: #059669; }
     .status.fail { color: #2563eb; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: auto 1fr auto repeat(4, 36px) auto;
+      gap: 0.75rem 0.75rem;
+      align-items: center;
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    }
+
+    .grid-header {
+      font-weight: 600;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    .grid-header.left { text-align: left; }
+
+    .course { display: contents; }
+
+    .course-name {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .ec {
+      text-align: right;
+      color: #9ca3af;
+      transition: color 0.2s ease, font-weight 0.2s ease;
+    }
+
+    .ec.passed {
+      color: #111827;
+      font-weight: 600;
+    }
+
+    input[type="checkbox"] {
+      transform: scale(1.15);
+      cursor: pointer;
+    }
+
+    .quarter {
+      height: 26px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .quarter.active {
+      background: #bbf7d0; /* lighter green */
+      color: #065f46;
+      font-weight: 600;
+    }
 
     footer {
       margin-top: 2rem;
@@ -105,25 +136,28 @@
     <h1>BSA EC Tracker</h1>
     <div class="subtitle">Aerospace Engineering – TU Delft (45 EC required)</div>
 
-    <div class="grid" id="courseGrid">
-      <div class="grid-header">Course</div>
-      <div class="grid-header ec">EC</div>
-      <div class="grid-header">Passed</div>
-    </div>
-
     <div class="progress-card">
       <div><strong>Total EC collected:</strong> <span id="totalEC">0</span> / 60</div>
       <div class="progress-bar">
+        <div class="threshold-label">45 EC</div>
+        <div class="threshold-marker"></div>
         <div class="progress-fill" id="progressFill"></div>
-        <div class="bsa-marker"></div>
-        <div class="bsa-label">45 EC</div>
       </div>
       <div class="status fail" id="statusText">You need 45 EC to pass the BSA.</div>
     </div>
 
-    <footer>
-      Single‑page web app · No data is stored · For planning only
-    </footer>
+    <div class="grid" id="courseGrid">
+      <div></div>
+      <div class="grid-header left">Course</div>
+      <div class="grid-header">EC</div>
+      <div class="grid-header">Q1</div>
+      <div class="grid-header">Q2</div>
+      <div class="grid-header">Q3</div>
+      <div class="grid-header">Q4</div>
+      <div></div>
+    </div>
+
+    <footer>Single-page web app · No data is stored · For planning only</footer>
   </div>
 
   <script>
@@ -131,20 +165,21 @@
     const TOTAL_EC = 60;
 
     const courses = [
-      { name: "Introduction to AE I", ec: 5 },
-      { name: "Calculus I", ec: 6 },
-      { name: "Exploring AE", ec: 3 },
-      { name: "Engineering Drawing", ec: 2 },
-      { name: "Aerospace Materials", ec: 3 },
-      { name: "Introduction to AE II", ec: 4 },
-      { name: "Dynamics", ec: 3 },
-      { name: "Aerospace Mechanics of Materials", ec: 3 },
-      { name: "Calculus II", ec: 5 },
-      { name: "Physics", ec: 6 },
-      { name: "Design and Construction", ec: 5 },
-      { name: "Aerospace Design and Systems Engineering Elements", ec: 4 },
-      { name: "Programming and Scientific Computing in Python for AE1", ec: 2 },
-      { name: "Linear Algebra", ec: 5 }
+      { name: "Introduction to AE I", ec: 5, q: [1] },
+      { name: "Statics", ec: 4, q: [1,2] },
+      { name: "Calculus I", ec: 6, q: [1] },
+      { name: "Exploring AE", ec: 3, q: [1] },
+      { name: "Engineering Drawing", ec: 2, q: [1] },
+      { name: "Aerospace Materials", ec: 3, q: [2] },
+      { name: "Introduction to AE II", ec: 4, q: [2] },
+      { name: "Dynamics", ec: 3, q: [2] },
+      { name: "Aerospace Mechanics of Materials", ec: 3, q: [2] },
+      { name: "Calculus II", ec: 5, q: [2] },
+      { name: "Physics", ec: 6, q: [3] },
+      { name: "Design and Construction", ec: 5, q: [3] },
+      { name: "Aerospace Design and Systems Engineering Elements", ec: 4, q: [3] },
+      { name: "Programming and Scientific Computing in Python for AE1", ec: 2, q: [4] },
+      { name: "Linear Algebra", ec: 5, q: [4] }
     ];
 
     const grid = document.getElementById("courseGrid");
@@ -152,63 +187,62 @@
     const progressFill = document.getElementById("progressFill");
     const statusText = document.getElementById("statusText");
 
-    courses.forEach(course => {
+    courses.forEach((course, i) => {
+      const id = `cb-${i}`;
       const row = document.createElement("div");
       row.className = "course";
 
       row.innerHTML = `
-        <label class="course-label">
-          ${course.name}
-          <input type="checkbox" data-ec="${course.ec}" />
-        </label>
-        <div class="ec">${course.ec}</div>
+        <div><input type="checkbox" id="${id}" data-ec="${course.ec}" /></div>
+        <label for="${id}" class="course-name">${course.name}</label>
+        <div class="ec" id="ec-${i}">${course.ec}</div>
+        ${[1,2,3,4].map(q => 
+          `<div class="quarter ${course.q.includes(q) ? 'active' : ''}">${course.q.includes(q) ? q : ''}</div>`
+        ).join('')}
         <div></div>
       `;
 
       grid.appendChild(row);
     });
 
-    grid.addEventListener("change", () => {
+    function updateProgress() {
       const checkboxes = grid.querySelectorAll("input[type=checkbox]");
       let total = 0;
 
-      checkboxes.forEach(cb => {
-        if (cb.checked) total += Number(cb.dataset.ec);
+      checkboxes.forEach((cb, i) => {
+        const ecEl = document.getElementById(`ec-${i}`);
+        if (cb.checked) {
+          total += Number(cb.dataset.ec);
+          ecEl.classList.add("passed");
+        } else {
+          ecEl.classList.remove("passed");
+        }
       });
 
       totalECEl.textContent = total;
 
-      // Progress bar fills from 0–60 EC
-      const progress = Math.min((total / TOTAL_EC) * 100, 100);
-      progressFill.style.width = progress + "%";
+      const percent = Math.min((total / TOTAL_EC) * 100, 100);
+      progressFill.style.width = percent + "%";
 
-      // Color based on BSA progress (0–45 EC)
-      const ratio = Math.min(total / BSA_THRESHOLD, 1);
-
-      const red = [239, 68, 68];
-      const yellow = [245, 158, 11];
-      const green = [16, 185, 129];
-
-      let mix;
-      if (ratio < 0.5) {
-        const t = ratio / 0.5;
-        mix = red.map((c, i) => Math.round(c + (yellow[i] - c) * t));
-      } else {
-        const t = (ratio - 0.5) / 0.5;
-        mix = yellow.map((c, i) => Math.round(c + (green[i] - c) * t));
-      }
-
-      const rightColor = `rgb(${mix[0]}, ${mix[1]}, ${mix[2]})`;
-      progressFill.style.background = `linear-gradient(90deg, red, ${rightColor})`;
-
+      let color;
       if (total >= BSA_THRESHOLD) {
+        color = "linear-gradient(90deg, #16a34a, #16a34a)";
         statusText.textContent = "🎉 BSA passed! You have enough EC.";
         statusText.className = "status pass";
+      } else if (total >= BSA_THRESHOLD / 2) {
+        color = "linear-gradient(90deg, #ef4444, #f59e0b)";
+        statusText.textContent = `You need ${BSA_THRESHOLD - total} more EC to pass the BSA.`;
+        statusText.className = "status fail";
       } else {
+        color = "linear-gradient(90deg, #ef4444, #ef4444)";
         statusText.textContent = `You need ${BSA_THRESHOLD - total} more EC to pass the BSA.`;
         statusText.className = "status fail";
       }
-    });
+
+      progressFill.style.background = color;
+    }
+
+    grid.addEventListener("change", updateProgress);
   </script>
 </body>
 </html>
