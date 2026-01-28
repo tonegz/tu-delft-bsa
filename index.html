@@ -133,6 +133,38 @@
       color: #065f46;
       font-weight: 600;
     }
+
+    .quarters-container {
+      display: contents;
+    }
+
+    .quarters-header.hidden {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: auto 1fr auto auto;
+        gap: 0.75rem 0.75rem;
+      }
+
+      .grid-header:nth-child(4),
+      .grid-header:nth-child(5),
+      .grid-header:nth-child(6),
+      .grid-header:nth-child(7) {
+        display: none;
+      }
+
+      .grid-header.quarters-header:last-of-type {
+        display: block !important;
+      }
+
+      .quarters-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.3rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -155,10 +187,11 @@
       <div></div>
       <div class="grid-header left">Course</div>
       <div class="grid-header">EC</div>
-      <div class="grid-header">Q1</div>
+      <div class="grid-header quarters-header">Q1</div>
       <div class="grid-header">Q2</div>
       <div class="grid-header">Q3</div>
       <div class="grid-header">Q4</div>
+      <div class="grid-header quarters-header" style="display: none;">Quarters</div>
       <div></div>
     </div>
 
@@ -198,9 +231,11 @@
         <div><input type="checkbox" id="${id}" data-ec="${course.ec}" /></div>
         <label for="${id}" class="course-name">${course.name}</label>
         <div class="ec" id="ec-${i}">${course.ec}</div>
-        ${[1,2,3,4].map(q => 
-          `<div class="quarter ${course.q.includes(q) ? 'active' : ''}">${course.q.includes(q) ? q : ''}</div>`
-        ).join('')}
+        <div class="quarters-container">
+          ${[1,2,3,4].map(q => 
+            `<div class="quarter ${course.q.includes(q) ? 'active' : ''}">${course.q.includes(q) ? q : ''}</div>`
+          ).join('')}
+        </div>
         <div></div>
       `;
 
