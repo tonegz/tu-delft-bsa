@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BSA EC Tracker – TU Delft AE</title>
+  <title>BSA Tracker – TU Delft Aerospace Engineering</title>
   <style>
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -133,17 +133,17 @@
 </head>
 <body>
   <div class="container">
-    <h1>BSA EC Tracker</h1>
-    <div class="subtitle">Aerospace Engineering – TU Delft (45 EC required)</div>
+    <h1>Aerospace Engineering – TU Delft (45 EC required)</h1>
+    <div class="subtitle">You must obtain at least 45 credits in the first academic year, otherwise you'll be kicked out!</div>
 
     <div class="progress-card">
-      <div><strong>Total EC collected:</strong> <span id="totalEC">0</span> / 60</div>
+      <div><strong>Total ECs collected:</strong> <span id="totalEC">0</span> / 60</div>
       <div class="progress-bar">
         <div class="threshold-label">45 EC</div>
         <div class="threshold-marker"></div>
         <div class="progress-fill" id="progressFill"></div>
       </div>
-      <div class="status fail" id="statusText">You need 45 EC to pass the BSA.</div>
+      <div class="status fail" id="statusText">You need 45 ECs to pass the BSA.</div>
     </div>
 
     <div class="grid" id="courseGrid">
@@ -227,15 +227,19 @@
       let color;
       if (total >= BSA_THRESHOLD) {
         color = "linear-gradient(90deg, #16a34a, #16a34a)";
-        statusText.textContent = "🎉 BSA passed! You have enough EC.";
+        statusText.textContent = "🎉 BSA passed! You have enough ECs.";
         statusText.className = "status pass";
       } else if (total >= BSA_THRESHOLD / 2) {
         color = "linear-gradient(90deg, #ef4444, #f59e0b)";
-        statusText.textContent = `You need ${BSA_THRESHOLD - total} more EC to pass the BSA.`;
+        const remaining = BSA_THRESHOLD - total;
+        const ecLabel = remaining === 1 ? 'EC' : 'ECs';
+        statusText.textContent = `You need ${remaining} more ${ecLabel} to pass the BSA.`;
         statusText.className = "status fail";
       } else {
         color = "linear-gradient(90deg, #ef4444, #ef4444)";
-        statusText.textContent = `You need ${BSA_THRESHOLD - total} more EC to pass the BSA.`;
+        const remaining = BSA_THRESHOLD - total;
+        const ecLabel = remaining === 1 ? 'EC' : 'ECs';
+        statusText.textContent = `You need ${remaining} more ${ecLabel} to pass the BSA.`;
         statusText.className = "status fail";
       }
 
