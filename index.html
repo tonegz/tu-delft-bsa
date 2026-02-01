@@ -45,10 +45,26 @@
       margin-top: 0.75rem;
     }
 
-    .progress-fill {
+    .partial-fill {
+      position: absolute;
+      top: 0;
       height: 100%;
       width: 0%;
-      transition: width 0.3s ease, background 0.3s ease;
+      left: 0%;
+      transition: width 0.3s ease, left 0.3s ease;
+      background: #9ca3af; /* grey for partial module credits */
+      border-radius: 999px;
+      z-index: 1;
+    }
+
+    .progress-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease, background 0.3s ease, left 0.3s ease;
+      z-index: 2;
     }
 
     .threshold-marker {
@@ -112,6 +128,11 @@
     .ec.passed {
       color: #111827;
       font-weight: 600;
+    }
+
+    .ec.partial {
+      color: #ef4444;
+      font-weight: 400;
     }
 
     input[type="checkbox"] {
@@ -193,6 +214,7 @@
       <div class="progress-bar">
         <div class="threshold-label">45 EC</div>
         <div class="threshold-marker"></div>
+        <div class="partial-fill" id="partialFill"></div>
         <div class="progress-fill" id="progressFill"></div>
       </div>
       <div class="status fail" id="statusText"></div>
@@ -231,9 +253,19 @@
       { name: "Linear Algebra", ec: 5, q: [4] }
     ];
 
+    // Modules: pairs that must be entirely passed to count their ECs
+    const modules = [
+      ["Aerospace Materials","Aerospace Mechanics of Materials"],
+      ["Introduction to AE I","Introduction to AE II"],
+      ["Exploring Aerospace Engineering","Engineering Drawing"],
+      ["Statics","Dynamics"],
+      ["Design and Construction","Aerospace Design and Systems Engineering Elements"]
+    ];
+
     const grid = document.getElementById("courseGrid");
     const totalECEl = document.getElementById("totalEC");
     const progressFill = document.getElementById("progressFill");
+    const partialFill = document.getElementById("partialFill");
     const statusText = document.getElementById("statusText");
 
     courses.forEach((course, i) => {
@@ -256,38 +288,97 @@
 
     function updateProgress() {
       const checkboxes = grid.querySelectorAll("input[type=checkbox]");
-      let total = 0;
+      let confirmedTotal = 0; // ECs that count towards the BSA (modules only count when complete)
+      let partialTotal = 0;   // ECs from module-courses where only part of the module is passed
 
+      // Clear previous partial/passed markings
       checkboxes.forEach((cb, i) => {
         const ecEl = document.getElementById(`ec-${i}`);
+        // Reset text to just the EC number (remove trailing asterisk)
+        ecEl.textContent = courses[i].ec;
+        ecEl.classList.remove("partial");
+        ecEl.title = '';
+      });
+
+      // Helper: find module index for quick lookup
+      const moduleOf = {};
+      modules.forEach((mod, mi) => {
+        mod.forEach(name => {
+          const idx = courses.findIndex(c => c.name === name);
+          if (idx !== -1) moduleOf[idx] = mi;
+        });
+      });
+
+      // Handle modules (pairs) first
+      modules.forEach(mod => {
+        const idxA = courses.findIndex(c => c.name === mod[0]);
+        const idxB = courses.findIndex(c => c.name === mod[1]);
+        if (idxA === -1 || idxB === -1) return; // safety
+        const cbA = document.getElementById(`cb-${idxA}`);
+        const cbB = document.getElementById(`cb-${idxB}`);
+        const ecElA = document.getElementById(`ec-${idxA}`);
+        const ecElB = document.getElementById(`ec-${idxB}`);
+
+        if (cbA.checked && cbB.checked) {
+          // whole module passed -> both ECs count
+          confirmedTotal += Number(cbA.dataset.ec) + Number(cbB.dataset.ec);
+          ecElA.classList.add("passed");
+          ecElB.classList.add("passed");
+        } else if (cbA.checked && !cbB.checked) {
+          // partial: show grey stretch and mark this EC with red asterisk + tooltip
+          partialTotal += Number(cbA.dataset.ec);
+          ecElA.classList.remove("passed");
+          ecElA.classList.add("partial");
+          ecElA.textContent = `${courses[idxA].ec} *`;
+          ecElA.title = `Pass "${courses[idxB].name}" to complete the module.`;
+        } else if (!cbA.checked && cbB.checked) {
+          partialTotal += Number(cbB.dataset.ec);
+          ecElB.classList.remove("passed");
+          ecElB.classList.add("partial");
+          ecElB.textContent = `${courses[idxB].ec} *`;
+          ecElB.title = `Pass "${courses[idxA].name}" to complete the module.`;
+        } else {
+          // none passed: nothing to do
+        }
+      });
+
+      // Handle non-module courses
+      checkboxes.forEach((cb, i) => {
+        if (moduleOf[i] !== undefined) return; // already handled as part of a module
+        const ecEl = document.getElementById(`ec-${i}`);
         if (cb.checked) {
-          total += Number(cb.dataset.ec);
+          confirmedTotal += Number(cb.dataset.ec);
           ecEl.classList.add("passed");
         } else {
           ecEl.classList.remove("passed");
         }
       });
 
-      totalECEl.textContent = total;
+      // Update displayed confirmed total (modules only count when fully passed)
+      totalECEl.textContent = confirmedTotal;
 
-      const percent = Math.min((total / TOTAL_EC) * 100, 100);
-      progressFill.style.width = percent + "%";
+      // Update progress fills: confirmed (colored) + partial (grey stretch next to it)
+      const confirmedPercent = Math.min((confirmedTotal / TOTAL_EC) * 100, 100);
+      let partialPercent = Math.min((partialTotal / TOTAL_EC) * 100, Math.max(0, 100 - confirmedPercent));
 
+      progressFill.style.width = confirmedPercent + "%";
+      partialFill.style.left = confirmedPercent + "%";
+      partialFill.style.width = partialPercent + "%";
+
+      // Determine color based on confirmed total only (partial doesn't help towards the threshold)
       let color;
-      if (total >= BSA_THRESHOLD) {
+      if (confirmedTotal >= BSA_THRESHOLD) {
         color = "linear-gradient(90deg, #16a34a, #16a34a)";
         statusText.textContent = "🎉 BSA passed! You have enough ECs.";
         statusText.className = "status pass";
-      } else if (total >= BSA_THRESHOLD / 2) {
+      } else if (confirmedTotal >= BSA_THRESHOLD / 2) {
         color = "linear-gradient(90deg, #ef4444, #f59e0b)";
-        const remaining = BSA_THRESHOLD - total;
-        const ecLabel = remaining === 1 ? 'EC' : 'ECs';
+        const remaining = BSA_THRESHOLD - confirmedTotal;
         statusText.textContent = `You need ${remaining} more`;
         statusText.className = "status fail";
       } else {
         color = "linear-gradient(90deg, #ef4444, #ef4444)";
-        const remaining = BSA_THRESHOLD - total;
-        const ecLabel = remaining === 1 ? 'EC' : 'ECs';
+        const remaining = BSA_THRESHOLD - confirmedTotal;
         statusText.textContent = `You need ${remaining} more`;
         statusText.className = "status fail";
       }
@@ -296,6 +387,8 @@
     }
 
     grid.addEventListener("change", updateProgress);
+    // initialize UI
+    updateProgress();
   </script>
 </body>
 </html>
