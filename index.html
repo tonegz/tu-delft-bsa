@@ -399,10 +399,45 @@
 
       // Confirmed area is always solid green
       progressFill.style.background = "#16a34a";
+
+      // Persist checkbox state to cookie
+      saveState();
+    }
+
+    // Persisted state helpers (cookies)
+    function saveState() {
+      const checkboxes = grid.querySelectorAll("input[type=checkbox]");
+      const checked = [];
+      checkboxes.forEach((cb, i) => { if (cb.checked) checked.push(i); });
+      try {
+        const value = encodeURIComponent(JSON.stringify(checked));
+        const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
+        document.cookie = `bsa_checked=${value}; expires=${expires}; path=/; samesite=Lax`;
+      } catch (e) {
+        console.error('Failed to save cookie', e);
+      }
+    }
+
+    function loadState() {
+      const cookie = document.cookie.split('; ').find(c => c.startsWith('bsa_checked='));
+      if (!cookie) return;
+      try {
+        const raw = decodeURIComponent(cookie.split('=')[1] || '[]');
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) {
+          arr.forEach(i => {
+            const el = document.getElementById(`cb-${i}`);
+            if (el) el.checked = true;
+          });
+        }
+      } catch (e) {
+        console.error('Failed to load cookie', e);
+      }
     }
 
     grid.addEventListener("change", updateProgress);
-    // initialize UI
+    // initialize UI from cookies if present
+    loadState();
     updateProgress();
   </script>
 </body>
