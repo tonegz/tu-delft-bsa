@@ -310,7 +310,8 @@
         const ecEl = document.getElementById(`ec-${i}`);
         // Reset text to just the EC number (remove trailing asterisk)
         ecEl.textContent = courses[i].ec;
-        ecEl.classList.remove("partial");
+        // remove both partial and passed so state is recalculated cleanly
+        ecEl.classList.remove("partial", "passed");
         ecEl.title = '';
       });
 
