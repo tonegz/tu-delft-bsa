@@ -97,6 +97,13 @@
     .status.pass { color: #059669; }
     .status.fail { color: #2563eb; }
 
+    .partial-note {
+      color: #9ca3af;
+      margin-left: 0.6rem;
+      font-size: 0.95rem;
+      display: inline-block;
+    }
+
     .grid {
       display: grid;
       grid-template-columns: auto 1fr auto repeat(4, 36px) auto;
@@ -199,6 +206,7 @@
         opacity: 0.5;
       }
       .threshold-label { display: none; }
+      .partial-note { display: none; }
     }
 
     @media (max-width: 480px) {
@@ -215,7 +223,7 @@
     <div class="subtitle">You must obtain at least 45 credits in the first academic year, <a href="https://www.tudelft.nl/en/student/my-study-me/rules-guidelines-and-participation/binding-recommendation-on-continuation-of-studies">or else</a></div>
 
     <div class="progress-card">
-      <div><strong>Total ECs collected:</strong> <span id="totalEC">0</span> / 60</div>
+      <div><strong>Total ECs collected:</strong> <span id="totalEC">0</span> / 60<span id="partialText" class="partial-note"></span></div>
       <div class="progress-bar">
         <div class="threshold-label">45 EC</div>
         <div class="threshold-marker"></div>
@@ -272,6 +280,7 @@
     const progressFill = document.getElementById("progressFill");
     const partialFill = document.getElementById("partialFill");
     const statusText = document.getElementById("statusText");
+    const partialText = document.getElementById("partialText");
 
     courses.forEach((course, i) => {
       const id = `cb-${i}`;
@@ -361,6 +370,13 @@
 
       // Update displayed confirmed total (modules only count when fully passed)
       totalECEl.textContent = confirmedTotal;
+
+      // Show partial points if any (only visible on non-small screens via CSS)
+      if (partialTotal > 0) {
+        partialText.textContent = ` (plus ${partialTotal} in unfinished modules)`;
+      } else {
+        partialText.textContent = '';
+      }
 
       // Update progress fills: confirmed (colored) + partial (grey stretch next to it)
       const confirmedPercent = Math.min((confirmedTotal / TOTAL_EC) * 100, 100);
