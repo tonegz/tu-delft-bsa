@@ -369,25 +369,18 @@
       partialFill.style.left = confirmedPercent + "%";
       partialFill.style.width = partialPercent + "%";
 
-      // Determine color based on confirmed total only (partial doesn't help towards the threshold)
-      let color;
+      // Status text logic (confirmed fill is always solid green)
       if (confirmedTotal >= BSA_THRESHOLD) {
-        color = "linear-gradient(90deg, #16a34a, #16a34a)";
         statusText.textContent = "🎉 BSA passed! You have enough ECs.";
         statusText.className = "status pass";
-      } else if (confirmedTotal >= BSA_THRESHOLD / 2) {
-        color = "linear-gradient(90deg, #ef4444, #f59e0b)";
-        const remaining = BSA_THRESHOLD - confirmedTotal;
-        statusText.textContent = `You need ${remaining} more`;
-        statusText.className = "status fail";
       } else {
-        color = "linear-gradient(90deg, #ef4444, #ef4444)";
         const remaining = BSA_THRESHOLD - confirmedTotal;
         statusText.textContent = `You need ${remaining} more`;
         statusText.className = "status fail";
       }
 
-      progressFill.style.background = color;
+      // Confirmed area is always solid green
+      progressFill.style.background = "#16a34a";
     }
 
     grid.addEventListener("change", updateProgress);
