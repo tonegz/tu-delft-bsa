@@ -41,7 +41,7 @@
       height: 22px;
       background: #e5e7eb;
       border-radius: 999px;
-      overflow: hidden;
+      overflow: visible; /* allow marker to extend above/below */
       margin-top: 0.75rem;
     }
 
@@ -70,19 +70,24 @@
     .threshold-marker {
       position: absolute;
       left: 75%;
-      top: -6px;
-      bottom: -6px;
-      width: 2px;
+      top: -18px;
+      bottom: -18px;
+      width: 4px;
       background: #374151;
+      z-index: 999;
+      border-radius: 3px;
     }
 
     .threshold-label {
       position: absolute;
       left: 75%;
-      top: -1.4rem;
+      top: -2.1rem;
       transform: translateX(-50%);
       font-size: 0.75rem;
       color: #374151;
+      z-index: 1000;
+      background: white;
+      padding: 0 6px;
     }
 
     .status {
