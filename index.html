@@ -328,13 +328,13 @@
           partialTotal += Number(cbA.dataset.ec);
           ecElA.classList.remove("passed");
           ecElA.classList.add("partial");
-          ecElA.textContent = `${courses[idxA].ec} *`;
+          ecElA.textContent = `${courses[idxA].ec}*`;
           ecElA.title = `Pass "${courses[idxB].name}" to complete the module.`;
         } else if (!cbA.checked && cbB.checked) {
           partialTotal += Number(cbB.dataset.ec);
           ecElB.classList.remove("passed");
           ecElB.classList.add("partial");
-          ecElB.textContent = `${courses[idxB].ec} *`;
+          ecElB.textContent = `${courses[idxB].ec}*`;
           ecElB.title = `Pass "${courses[idxA].name}" to complete the module.`;
         } else {
           // none passed: nothing to do
