@@ -1,5 +1,5 @@
 # tu-delft-bsa
-TU Delft BSA (binding study advice) calculator
+TU Delft BSA (binding study advice) calculator for Bachelor Aerospace Engineering
 
 Home page: https://tonegz.github.io/tu-delft-bsa/
 
